@@ -6,7 +6,8 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Jenssegers\Agent\Agent as Agent;
+use Cartalyst\Sentinel\Laravel\Facades\Sentinel;
 abstract class BaseCacheProfile implements CacheProfile
 {
     public function enabled(Request $request): bool
@@ -23,9 +24,11 @@ abstract class BaseCacheProfile implements CacheProfile
 
     public function useCacheNameSuffix(Request $request): string
     {
-        return Auth::check()
-            ? (string) Auth::id()
-            : '';
+         $Agent = new Agent();
+        $mobile = $Agent->isMobile();
+        return Sentinel::check()
+            ? (string) Sentinel::getUser()->id."_".$mobile."_".session('currency')
+            : '_'.$mobile."_".session('currency');
     }
 
     public function isRunningInConsole(): bool
